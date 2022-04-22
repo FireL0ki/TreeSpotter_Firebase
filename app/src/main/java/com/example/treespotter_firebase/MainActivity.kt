@@ -10,12 +10,19 @@ import com.google.firebase.ktx.Firebase
 import java.util.*
 
 private const val TAG = "MAIN_ACTIVITY"
+
 class MainActivity : AppCompatActivity() {
+
+    val CURRENT_FRAGMENT_BUNDLE_KEY = "current fragment bundle key"
+    var currentFragmentTag = "MAP"
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        showFragment("MAP")
+        currentFragmentTag = savedInstanceState?.getString(CURRENT_FRAGMENT_BUNDLE_KEY) ?: "MAP"
+
+        showFragment(currentFragmentTag)
 
         val bottomNavigationView = findViewById<BottomNavigationView>(R.id.bottomNavigationView)
 
@@ -40,6 +47,9 @@ class MainActivity : AppCompatActivity() {
 
     private fun showFragment(tag: String) {
         // if we are not seeing the fragment with teh given tag, display it
+
+        currentFragmentTag = tag
+
         if (supportFragmentManager.findFragmentByTag(tag) == null) {
             val transaction = supportFragmentManager.beginTransaction()
             when (tag) {
@@ -48,5 +58,10 @@ class MainActivity : AppCompatActivity() {
             }
             transaction.commit()
         }
+    }
+
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+        outState.putString(CURRENT_FRAGMENT_BUNDLE_KEY, currentFragmentTag)
     }
 }
