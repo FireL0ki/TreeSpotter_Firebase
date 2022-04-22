@@ -3,6 +3,7 @@ package com.example.treespotter_firebase
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
+import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.firebase.firestore.Query
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
@@ -14,38 +15,38 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        val db = Firebase.firestore
+        showFragment("MAP")
 
-//        val tree = mapOf("name" to "pine", "dateSpotted" to Date())
-//        db.collection("trees").add(tree)
-//        val tree2 = mapOf("name" to "oak", "dateSpotted" to Date())
-//        db.collection("trees").add(tree2)
+        val bottomNavigationView = findViewById<BottomNavigationView>(R.id.bottomNavigationView)
 
-//        val tree = Tree("Pine", Date())
-//        db.collection("trees").add(tree)
-
-        db.collection("trees")
-            .whereEqualTo("name", "Pine")
-            .whereEqualTo("favorite", true)
-            .orderBy("dateSpotted", Query.Direction.DESCENDING) // sorted with most recent first
-            .limit(10)
-            .addSnapshotListener { treeDocuments, error ->
-
-            if (error != null) {
-                Log.e(TAG, "Error getting all trees", error)
-            }
-
-            if (treeDocuments != null) {
-                for (treeDoc in treeDocuments) {
-                    val treeFromFirebase = treeDoc.toObject(Tree::class.java)
-//                    val name = treeDoc["name"]
-//                    val dateSpotted = treeDoc["dateSpotted"]
-//                    val favorite = treeDoc["favorite"] // added in Firebase example
-                    val path = treeDoc.reference.path
-                    Log.d(TAG, "$treeFromFirebase, $path")
+        bottomNavigationView.setOnItemSelectedListener { menuItem ->
+            when (menuItem.itemId) {
+                R.id.show_map -> {
+                    showFragment("MAP")
+                    true
+                }
+                R.id.show_list -> {
+                    showFragment("LIST")
+                    true
+                }
+                else -> {
+                    false
                 }
             }
         }
 
+
+    }
+
+    private fun showFragment(tag: String) {
+        // if we are not seeing the fragment with teh given tag, display it
+        if (supportFragmentManager.findFragmentByTag(tag) == null) {
+            val transaction = supportFragmentManager.beginTransaction()
+            when (tag) {
+                "MAP" -> transaction.replace(R.id.fragmentContainerView, TreeMapFragment.newInstance(), "MAP")
+                "LIST" -> transaction.replace(R.id.fragmentContainerView, TreeListFragment.newInstance(), "LIST")
+            }
+            transaction.commit()
+        }
     }
 }
